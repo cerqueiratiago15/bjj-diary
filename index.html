@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="rolls" />
+<meta name="theme-color" content="#0e1a1b" />
+<title>rolls — diário de jiu-jitsu</title>
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230e1a1b'/%3E%3Crect x='20' y='78' width='140' height='28' rx='4' fill='%232566a8'/%3E%3Crect x='112' y='74' width='30' height='36' rx='3' fill='%23141414'/%3E%3Crect x='118' y='78' width='3' height='28' fill='%23f0ead9'/%3E%3Crect x='125' y='78' width='3' height='28' fill='%23f0ead9'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --mat:#0e1a1b; --mat-2:#132425; --panel:#17292b; --panel-2:#1d3133;
+    --line:rgba(240,234,217,.10); --line-strong:rgba(240,234,217,.18);
+    --bone:#f0ead9; --dim:#8fa39d; --dim-2:#647571;
+    --belt:#2566a8; --belt-ink:#f0ead9;
+    --good:#5fb37a; --warn:#d98a4b; --red:#d9705f;
+    --display:'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+    --ui:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --r:14px; --pad:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--mat);color:var(--bone);font-family:var(--ui)}
+  body{-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top);min-height:100vh}
+  .app{max-width:520px;margin:0 auto;padding:0 var(--pad);padding-bottom:120px}
+
+  .topbar{display:flex;align-items:baseline;justify-content:space-between;padding:18px 0 6px}
+  .wordmark{font-family:var(--display);font-weight:900;font-size:30px;letter-spacing:-.5px;line-height:1}
+  .wordmark .dot{color:var(--belt)}
+  .tagline{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim-2);font-weight:700}
+
+  .belt-wrap{margin:14px 0 4px;cursor:pointer}
+  .belt{position:relative;height:30px;border-radius:5px;overflow:hidden;display:flex;
+        box-shadow:inset 0 2px 4px rgba(0,0,0,.45), inset 0 -2px 3px rgba(0,0,0,.3)}
+  .belt-body{flex:1;background:var(--belt);
+    background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 6px,rgba(255,255,255,.04) 6px 12px)}
+  .belt.white .belt-body{background:#e6e0cf;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 6px,rgba(0,0,0,.02) 6px 12px)}
+  .belt-bar{width:78px;background:#141414;display:flex;align-items:center;justify-content:center;gap:5px;
+    border-left:3px solid rgba(0,0,0,.5);border-right:3px solid rgba(0,0,0,.5)}
+  .belt.black .belt-bar{background:#b9342a}
+  .tick{width:4px;height:20px;background:var(--bone);border-radius:1px;opacity:.95}
+  .belt-meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;gap:10px}
+  .belt-rank{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:14px}
+  .belt-stats{font-size:12.5px;color:var(--dim);text-align:right;line-height:1.4}
+
+  .btn{appearance:none;border:0;font-family:var(--ui);font-size:16px;font-weight:600;border-radius:var(--r);
+       padding:15px 18px;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;
+       transition:transform .12s ease, filter .12s ease}
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:var(--belt);color:var(--belt-ink);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+  .btn-primary.dark-ink{color:#0e1a1b}
+  .btn-ghost{background:var(--panel);color:var(--bone);border:1px solid var(--line-strong)}
+  .btn-row{display:flex;gap:10px}
+  .btn-row .btn{flex:1}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid rgba(217,112,95,.4)}
+  .cta{margin:18px 0 6px}
+
+  .sec{display:flex;align-items:center;gap:12px;margin:26px 0 12px}
+  .sec h2{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--dim);margin:0}
+  .sec .rule{flex:1;height:1px;background:var(--line)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;cursor:pointer;
+        transition:border-color .15s ease, transform .12s ease}
+  .card:active{transform:scale(.992)}
+  .card-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
+  .card-date{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--bone)}
+  .card-type{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+             border:1px solid var(--line-strong);padding:3px 8px;border-radius:999px}
+  .card-tech{font-size:15px;line-height:1.45;color:var(--bone);margin:0 0 8px}
+  .card-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+  .chip{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--panel-2);color:var(--dim);border:1px solid var(--line)}
+  .chip.tag{color:var(--belt);border-color:rgba(255,255,255,.06)}
+  .chip.goal{color:var(--bone);border-color:var(--line-strong)}
+  .status{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:.03em}
+  .status::before{content:"";width:8px;height:8px;border-radius:50%}
+  .status.needs-work{color:var(--warn)} .status.needs-work::before{background:var(--warn)}
+  .status.got-it{color:var(--good)} .status.got-it::before{background:var(--good)}
+  .has-video{color:var(--belt);font-weight:700}
+  .has-clip{color:var(--dim);font-weight:700}
+
+  .empty{text-align:center;padding:42px 20px;color:var(--dim)}
+  .empty .big{font-family:var(--display);font-weight:800;font-size:18px;color:var(--bone);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+  .field input[type=text],.field input[type=number],.field input[type=date],.field textarea,.field select{
+    width:100%;background:var(--mat-2);border:1px solid var(--line-strong);border-radius:11px;color:var(--bone);
+    font-family:var(--ui);font-size:16px;padding:13px 14px;outline:none}
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--belt)}
+  .field .hint{font-size:11.5px;color:var(--dim-2);margin-top:6px}
+  .two{display:flex;gap:12px}
+  .two .field{flex:1}
+
+  .rolls-pair{display:grid;grid-template-columns:1fr;gap:12px}
+  .roll-box{border-radius:11px;padding:12px 12px 4px;border:1px solid var(--line-strong);background:var(--mat-2)}
+  .roll-box.worked{border-left:3px solid var(--good)}
+  .roll-box.didnt{border-left:3px solid var(--warn)}
+  .roll-box label{margin-bottom:6px}
+  .roll-box textarea{border:0;background:transparent;padding:0 0 10px}
+  .roll-box textarea:focus{border:0}
+
+  .picker{display:flex;flex-wrap:wrap;gap:8px}
+  .pick{padding:9px 14px;border-radius:999px;border:1px solid var(--line-strong);background:var(--mat-2);
+        color:var(--dim);font-size:14px;font-weight:600;cursor:pointer;transition:all .12s ease}
+  .pick[aria-pressed="true"]{background:var(--belt);color:var(--belt-ink);border-color:var(--belt)}
+  .pick.dark-on[aria-pressed="true"]{color:#0e1a1b}
+  .picker-empty{font-size:13px;color:var(--dim-2);line-height:1.5}
+
+  .tag-suggest{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+  .tag-suggest .pick{padding:6px 11px;font-size:12.5px}
+
+  .clip-row{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .clip-btn{flex:1;background:var(--mat-2);border:1px dashed var(--line-strong);color:var(--bone);border-radius:11px;
+    padding:13px 14px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  .clip-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+  .clip-pill{display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line-strong);
+    border-radius:11px;padding:11px 13px;margin-top:4px}
+  .clip-pill .nm{flex:1;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .clip-pill .sz{font-size:11.5px;color:var(--dim);font-weight:600}
+  .clip-pill .x{background:none;border:0;color:var(--red);font-size:20px;cursor:pointer;line-height:1;padding:0 4px}
+
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:8px 0 14px}
+  .detail-date{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.02em;line-height:1.15}
+  .video{position:relative;width:100%;aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;background:#000;margin-bottom:16px;border:1px solid var(--line)}
+  .video iframe,.video video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+  .video-missing{display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim-2);font-size:13px;text-align:center;padding:20px;line-height:1.5}
+  .block{margin-bottom:16px}
+  .block .k{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+  .block .v{font-size:16px;line-height:1.55;white-space:pre-wrap}
+  .block.worked .k{color:var(--good)} .block.didnt .k{color:var(--warn)}
+  .meta-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .meta-grid .mg{flex:1;min-width:90px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+  .meta-grid .mg .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:3px}
+  .meta-grid .mg .v{font-family:var(--display);font-weight:700;font-size:17px}
+  .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+
+  .pos-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;background:var(--panel);
+            border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;cursor:pointer}
+  .pos-item .name{font-size:16px;font-weight:600}
+  .pos-item .cnt{font-family:var(--display);font-weight:800;font-size:15px;color:var(--belt)}
+  .pos-item .bar{height:4px;background:var(--belt);border-radius:2px;margin-top:8px;opacity:.55}
+
+  .search-bar{position:sticky;top:0;background:var(--mat);padding:14px 0 8px;z-index:5}
+  .search-bar input{width:100%;background:var(--panel);border:1px solid var(--line-strong);border-radius:12px;
+    color:var(--bone);font-size:16px;padding:13px 15px;outline:none}
+  .search-bar input:focus{border-color:var(--belt)}
+
+  .set-group{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+  .set-group h3{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--dim);margin:0 0 14px}
+  .belt-picker{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .belt-swatch{width:42px;height:42px;border-radius:10px;cursor:pointer;border:2px solid transparent;position:relative}
+  .belt-swatch[aria-pressed="true"]{border-color:var(--bone);box-shadow:0 0 0 2px var(--mat),0 0 0 4px var(--bone)}
+  .stepper{display:flex;align-items:center;gap:14px}
+  .stepper button{width:42px;height:42px;border-radius:11px;border:1px solid var(--line-strong);background:var(--mat-2);color:var(--bone);font-size:22px;cursor:pointer}
+  .stepper .n{font-family:var(--display);font-weight:800;font-size:22px;min-width:28px;text-align:center}
+  .set-line{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;color:var(--dim);padding:8px 0}
+  .set-line .val{color:var(--bone);font-weight:600}
+  .backup-note{font-size:12.5px;color:var(--dim-2);line-height:1.5;margin-top:10px}
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--bone);color:#0e1a1b;
+    font-weight:700;font-size:14px;padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:88%;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .goal-form{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:20px}
+  .goal-form .field{margin-bottom:12px}
+  .goal-form .field:last-of-type{margin-bottom:14px}
+  .goal-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px 16px;margin-bottom:11px;cursor:pointer}
+  .goal-card.done{opacity:.6}
+  .goal-head{display:flex;align-items:flex-start;gap:12px}
+  .goal-check{flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:2px solid var(--line-strong);background:var(--mat-2);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .goal-check svg{width:14px;height:14px;stroke:var(--belt);fill:none;stroke-width:3;opacity:0}
+  .goal-card.done .goal-check{background:var(--belt);border-color:var(--belt)}
+  .goal-card.done .goal-check svg{stroke:var(--belt-ink);opacity:1}
+  .goal-main{flex:1;min-width:0}
+  .goal-title{font-size:16px;font-weight:600;line-height:1.35}
+  .goal-card.done .goal-title{text-decoration:line-through}
+  .goal-note{font-size:13.5px;color:var(--dim);line-height:1.5;margin-top:4px}
+  .goal-prog{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--dim)}
+  .goal-prog .dotsep{color:var(--dim-2)}
+  .goal-prog .warntr{color:var(--warn);font-weight:700}
+  .goal-divider{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--dim-2);margin:22px 0 12px}
+
+  .nc-item{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;margin-bottom:9px;cursor:pointer}
+  .nc-item .tgt{flex:0 0 auto;width:10px;height:10px;border-radius:50%;border:2px solid var(--belt)}
+  .nc-item .nc-main{flex:1;min-width:0}
+  .nc-item .t{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nc-item .pv{font-size:11.5px;color:var(--dim);margin-top:2px}
+  .nc-item .pv.warn{color:var(--warn);font-weight:600}
+
+  .nav{position:fixed;left:0;right:0;bottom:0;background:rgba(14,26,27,.92);backdrop-filter:blur(14px);
+       border-top:1px solid var(--line);display:flex;padding:8px 0 calc(8px + env(safe-area-inset-bottom));z-index:20}
+  .nav-inner{max-width:520px;margin:0 auto;display:flex;width:100%;padding:0 var(--pad)}
+  .nav button{flex:1;background:none;border:0;color:var(--dim-2);font-family:var(--ui);font-size:9.5px;font-weight:700;
+    letter-spacing:.02em;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0;white-space:nowrap}
+  .nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .nav button[aria-current="true"]{color:var(--belt)}
+
+  .view{display:none;animation:fade .22s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .back{display:inline-flex;align-items:center;gap:7px;background:none;border:0;color:var(--dim);font-size:14px;font-weight:600;cursor:pointer;padding:14px 0 4px}
+  .back svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- INICIO -->
+  <section id="view-home" class="view active">
+    <div class="topbar">
+      <div class="wordmark">rolls<span class="dot">.</span></div>
+      <div class="tagline">diário de treino</div>
+    </div>
+    <div class="belt-wrap" data-action="go-settings">
+      <div class="belt" id="belt-graphic"><div class="belt-body"></div><div class="belt-bar" id="belt-bar"></div></div>
+      <div class="belt-meta"><div class="belt-rank" id="belt-rank">FAIXA BRANCA</div><div class="belt-stats" id="belt-stats"></div></div>
+    </div>
+    <button class="btn btn-primary cta" data-action="new">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Registrar treino de hoje
+    </button>
+    <div id="home-goals"></div>
+    <div class="sec"><h2>Treinos recentes</h2><div class="rule"></div></div>
+    <div id="home-feed"></div>
+  </section>
+
+  <!-- METAS -->
+  <section id="view-goals" class="view">
+    <div class="topbar"><div class="wordmark" style="font-size:24px">metas<span class="dot">.</span></div></div>
+    <p style="color:var(--dim);font-size:13.5px;line-height:1.5;margin:0 0 18px">Seus objetivos de longo prazo. Marque quais você treinou ao registrar um treino, e cada meta monta o próprio histórico.</p>
+    <div class="goal-form">
+      <div class="field"><label id="goal-form-title-lbl">Nova meta</label>
+        <input type="text" id="g-title" placeholder="ex: ter uma boa retenção de guarda"></div>
+      <div class="two">
+        <div class="field"><label>Data alvo</label><input type="date" id="g-target"></div>
+      </div>
+      <div class="field"><label>Vídeo de referência</label>
+        <input type="text" id="g-video" placeholder="Um link do YouTube para esta meta (opcional)"></div>
+      <div class="field"><label>Por que importa / nota</label>
+        <input type="text" id="g-note" placeholder="Um lembrete do que você busca (opcional)"></div>
+      <button class="btn btn-primary" data-action="add-goal" id="g-submit">Adicionar meta</button>
+      <div id="g-cancel-wrap" style="margin-top:9px;display:none">
+        <button class="btn btn-ghost" data-action="cancel-goal-edit">Cancelar edição</button>
+      </div>
+    </div>
+    <div id="goals-list"></div>
+  </section>
+
+  <!-- META DETALHE -->
+  <section id="view-goal" class="view">
+    <button class="back" data-action="back-goals"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Metas</button>
+    <div id="goal-body"></div>
+  </section>
+
+  <!-- FORMULARIO DE TREINO -->
+  <section id="view-entry" class="view">
+    <button class="back" data-action="back-home"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Cancelar</button>
+    <h1 class="detail-date" id="entry-title" style="margin:6px 0 18px">Registrar treino</h1>
+
+    <div class="two">
+      <div class="field"><label>Data</label><input type="date" id="f-date"></div>
+      <div class="field"><label>Estilo</label>
+        <div class="picker" id="f-type">
+          <button type="button" class="pick" data-val="Gi">Gi</button>
+          <button type="button" class="pick" data-val="No-Gi">No-Gi</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field"><label>Técnicas e posições treinadas</label>
+      <textarea id="f-tech" placeholder="ex: guarda fechada, montagem do triângulo pelo overhook, raspagem de quadril"></textarea></div>
+
+    <div class="field"><label>Sparring</label>
+      <div class="rolls-pair">
+        <div class="roll-box worked"><label>O que funcionou</label>
+          <textarea id="f-worked" placeholder="Acertei o triângulo duas vezes da guarda fechada. A quebra de pegada finalmente saiu."></textarea></div>
+        <div class="roll-box didnt"><label>O que não funcionou</label>
+          <textarea id="f-didnt" placeholder="Fiquei empilhado várias vezes. Perdi o ângulo quando o cara maior apoiou a base."></textarea></div>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="field"><label>Rounds</label><input type="number" id="f-rounds" min="0" inputmode="numeric" placeholder="5"></div>
+      <div class="field"><label>Tempo de tatame (min)</label><input type="number" id="f-dur" min="0" inputmode="numeric" placeholder="60"></div>
+    </div>
+
+    <div class="field"><label>Parceiros de treino</label>
+      <input type="text" id="f-partners" placeholder="Carlos, Bruno, o faixa-branca novo"></div>
+
+    <div class="field"><label>Como você se sentiu</label>
+      <div class="picker" id="f-feel">
+        <button type="button" class="pick" data-val="Esgotado">Esgotado</button>
+        <button type="button" class="pick" data-val="Ok">Ok</button>
+        <button type="button" class="pick" data-val="Afiado">Afiado</button>
+        <button type="button" class="pick" data-val="No fluxo">No fluxo</button>
+      </div>
+    </div>
+
+    <div class="field"><label>Metas que você treinou hoje</label>
+      <div class="picker multi" id="f-goals"></div>
+      <div class="hint">Marque uma meta para adicionar este treino ao histórico dela.</div>
+    </div>
+
+    <div class="field"><label>Tags / posições</label>
+      <input type="text" id="f-tags" placeholder="triângulo, guarda fechada, pegada">
+      <div class="hint">Separadas por vírgula. Elas formam sua biblioteca de posições.</div>
+      <div class="tag-suggest" id="f-tag-suggest"></div>
+    </div>
+
+    <div class="field"><label>Link do YouTube</label>
+      <input type="text" id="f-video" placeholder="Cole um link do YouTube para a posição">
+      <div class="hint">Links de Watch / Shorts / youtu.be funcionam. Toca dentro do treino.</div>
+    </div>
+
+    <div class="field"><label>Clipe do seu celular</label>
+      <div id="f-clip-empty" class="clip-row">
+        <button type="button" class="clip-btn" data-action="attach-clip">
+          <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          Anexar um clipe curto
+        </button>
+      </div>
+      <div id="f-clip-pill" class="clip-pill" style="display:none">
+        <span class="nm" id="f-clip-name"></span>
+        <span class="sz" id="f-clip-size"></span>
+        <button type="button" class="x" data-action="remove-clip" aria-label="Remover clipe">&times;</button>
+      </div>
+      <input type="file" id="f-clip-file" accept="video/*" style="display:none">
+      <div class="hint">Ideal para trechos curtos de técnica, não rounds inteiros. Fica <b>só neste celular</b> — clipes não entram no backup do iCloud.</div>
+    </div>
+
+    <div class="field"><label>Status</label>
+      <div class="picker" id="f-status">
+        <button type="button" class="pick" data-val="needs-work">Precisa treinar</button>
+        <button type="button" class="pick" data-val="got-it">Dominado</button>
+      </div>
+    </div>
+
+    <div class="field"><label>Notas</label>
+      <textarea id="f-notes" placeholder="Mais alguma coisa — dicas do professor, uma pergunta, um detalhe pra treinar na próxima."></textarea></div>
+
+    <button class="btn btn-primary" data-action="save">Salvar treino</button>
+    <div id="entry-delete-wrap" style="margin-top:10px;display:none">
+      <button class="btn btn-danger" data-action="delete">Excluir este treino</button>
+    </div>
+  </section>
+
+  <!-- DETALHE -->
+  <section id="view-detail" class="view">
+    <button class="back" data-action="back-home"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
+    <div id="detail-body"></div>
+  </section>
+
+  <!-- POSICOES -->
+  <section id="view-positions" class="view">
+    <div class="topbar"><div class="wordmark" style="font-size:24px">posições<span class="dot">.</span></div></div>
+    <p style="color:var(--dim);font-size:13.5px;line-height:1.5;margin:0 0 18px">Cada tag que você registra forma esta biblioteca. Toque em uma para ver todas as suas notas e clipes dela.</p>
+    <div id="positions-list"></div>
+  </section>
+
+  <!-- POSICAO UNICA -->
+  <section id="view-position" class="view">
+    <button class="back" data-action="back-positions"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Posições</button>
+    <h1 class="detail-date" id="position-title" style="margin:6px 0 16px"></h1>
+    <div id="position-entries"></div>
+  </section>
+
+  <!-- BUSCA -->
+  <section id="view-search" class="view">
+    <div class="search-bar"><input type="text" id="search-input" placeholder="Buscar em notas, posições, parceiros…" autocomplete="off"></div>
+    <div id="search-results"></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="view-settings" class="view">
+    <div class="topbar"><div class="wordmark" style="font-size:24px">ajustes<span class="dot">.</span></div></div>
+    <div class="set-group">
+      <h3>Sua faixa</h3>
+      <div class="belt-picker" id="belt-picker"></div>
+      <div class="set-line"><span>Graus</span>
+        <div class="stepper"><button data-action="stripe-down">&minus;</button><span class="n" id="stripe-n">0</span><button data-action="stripe-up">+</button></div>
+      </div>
+    </div>
+    <div class="set-group">
+      <h3>Backup no iCloud</h3>
+      <button class="btn btn-primary" data-action="backup">Fazer backup no iCloud Drive</button>
+      <div class="backup-note">Toque e escolha <b>Salvar em Arquivos &rarr; iCloud Drive</b>. Seus treinos e metas ficam salvos lá e sincronizam entre seus aparelhos Apple. Clipes do celular ficam só neste aparelho.</div>
+      <div style="height:12px"></div>
+      <button class="btn btn-ghost" data-action="restore-pick">Restaurar de um backup</button>
+      <input type="file" id="restore-file" accept="application/json,.json" style="display:none">
+      <div class="set-line" style="margin-top:8px"><span>Último backup</span><span class="val" id="last-backup">nunca</span></div>
+    </div>
+    <div class="set-group">
+      <h3>Seu histórico</h3>
+      <div class="set-line"><span>Treinos registrados</span><span class="val" id="stat-sessions">0</span></div>
+      <div class="set-line"><span>Tempo total de tatame</span><span class="val" id="stat-mat">0h</span></div>
+      <div class="set-line"><span>Sequência atual</span><span class="val" id="stat-streak">0 dias</span></div>
+      <div class="set-line"><span>Metas ativas</span><span class="val" id="stat-goals">0</span></div>
+      <div class="set-line"><span>Posições registradas</span><span class="val" id="stat-pos">0</span></div>
+    </div>
+    <button class="btn btn-danger" data-action="wipe">Apagar tudo</button>
+    <div class="backup-note">Faça backup antes — isso limpa todos os treinos e metas deste aparelho e não dá para desfazer.</div>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button data-nav="home" aria-current="true"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z"/></svg>Início</button>
+    <button data-nav="goals"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Metas</button>
+    <button data-nav="positions"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Posições</button>
+    <button data-nav="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Buscar</button>
+    <button data-nav="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>Ajustes</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var store = (function(){
+    var mem={}, ok=false;
+    try{ var k="__rolls_test"; localStorage.setItem(k,"1"); localStorage.removeItem(k); ok=true; }catch(e){ ok=false; }
+    return {
+      get:function(k){ try{ return ok?localStorage.getItem(k):(k in mem?mem[k]:null); }catch(e){ return (k in mem)?mem[k]:null; } },
+      set:function(k,v){ try{ if(ok)localStorage.setItem(k,v); else mem[k]=v; }catch(e){ mem[k]=v; } }
+    };
+  })();
+
+  var clipDB = (function(){
+    var DB="rolls-clips", STORE="clips", dbp=null;
+    function open(){
+      if(dbp) return dbp;
+      dbp=new Promise(function(res,rej){
+        try{
+          var req=indexedDB.open(DB,1);
+          req.onupgradeneeded=function(){ req.result.createObjectStore(STORE); };
+          req.onsuccess=function(){ res(req.result); };
+          req.onerror=function(){ rej(req.error); };
+        }catch(e){ rej(e); }
+      });
+      return dbp;
+    }
+    function run(mode,fn){
+      return open().then(function(db){
+        return new Promise(function(res,rej){
+          var t=db.transaction(STORE,mode), s=t.objectStore(STORE), r=fn(s);
+          t.oncomplete=function(){ res(r?r.result:undefined); };
+          t.onerror=function(){ rej(t.error); };
+          t.onabort=function(){ rej(t.error); };
+        });
+      });
+    }
+    return {
+      put:function(id,blob){ return run("readwrite",function(s){ return s.put(blob,id); }); },
+      get:function(id){ return run("readonly",function(s){ return s.get(id); }); },
+      del:function(id){ return run("readwrite",function(s){ return s.delete(id); }); },
+      clear:function(){ return run("readwrite",function(s){ return s.clear(); }); }
+    };
+  })();
+
+  var KEY="rolls.data.v1";
+  var LOC="pt-BR";
+  var BELTS={
+    white:{label:"Faixa Branca",color:"#e6e0cf",ink:"#0e1a1b",dark:true},
+    blue:{label:"Faixa Azul",color:"#2566a8",ink:"#f0ead9"},
+    purple:{label:"Faixa Roxa",color:"#6a4c93",ink:"#f0ead9"},
+    brown:{label:"Faixa Marrom",color:"#6f4a2c",ink:"#f0ead9"},
+    black:{label:"Faixa Preta",color:"#1a1a1a",ink:"#f0ead9"}
+  };
+  var BELT_ORDER=["white","blue","purple","brown","black"];
+
+  var state=load();
+  function load(){
+    var raw=store.get(KEY);
+    if(raw){ try{ var d=JSON.parse(raw); d.entries=d.entries||[]; d.goals=d.goals||[]; d.profile=d.profile||{belt:"white",stripes:0,lastBackup:null}; return d; }catch(e){} }
+    return { entries:[], goals:[], profile:{belt:"white",stripes:0,lastBackup:null} };
+  }
+  function save(){ store.set(KEY, JSON.stringify(state)); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+  function ytId(url){ if(!url) return null; var m=url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null; }
+  function ytStart(url){ var m=url&&url.match(/[?&]t=(\d+)/); return m?parseInt(m[1],10):null; }
+
+  function todayISO(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function fmtDate(iso){ var p=iso.split("-"); return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(LOC,{weekday:"short",month:"short",day:"numeric"}); }
+  function fmtLong(iso){ var p=iso.split("-"); return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(LOC,{weekday:"long",month:"long",day:"numeric",year:"numeric"}); }
+  function fmtTarget(iso){ var p=iso.split("-"); return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(LOC,{day:"numeric",month:"short",year:"numeric"}); }
+  function agoText(iso){
+    if(!iso) return "";
+    var p=iso.split("-"), d=new Date(p[0],p[1]-1,p[2]); d.setHours(0,0,0,0);
+    var now=new Date(); now.setHours(0,0,0,0);
+    var diff=Math.round((now-d)/86400000);
+    if(diff<=0) return "hoje"; if(diff===1) return "ontem";
+    if(diff<7) return "há "+diff+" dias"; if(diff<14) return "semana passada";
+    if(diff<30) return "há "+Math.floor(diff/7)+" semanas"; if(diff<60) return "mês passado";
+    return "há "+Math.floor(diff/30)+" meses";
+  }
+  function isStale(ago){ return /semana|mês|mes/.test(ago); }
+  function fmtSize(b){ b=+b||0; if(b<1024) return b+" B"; if(b<1048576) return Math.round(b/1024)+" KB"; return (b/1048576).toFixed(1)+" MB"; }
+
+  function sorted(){ return state.entries.slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:((a.created||0)<(b.created||0)?1:-1); }); }
+  function allTags(){ var m={}; state.entries.forEach(function(e){ (e.tags||[]).forEach(function(t){ m[t]=(m[t]||0)+1; }); }); return m; }
+  function streak(){
+    if(!state.entries.length) return 0;
+    var days={}; state.entries.forEach(function(e){ days[e.date]=true; });
+    var key=function(dt){ var x=new Date(dt); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10); };
+    var d=new Date(), n=0; if(!days[key(d)]) d.setDate(d.getDate()-1);
+    while(days[key(d)]){ n++; d.setDate(d.getDate()-1); } return n;
+  }
+  function matMinutes(){ return state.entries.reduce(function(s,e){ return s+(parseInt(e.duration,10)||0); },0); }
+  function goalById(id){ return state.goals.filter(function(g){ return g.id===id; })[0]; }
+  function goalSessions(id){ return sorted().filter(function(e){ return (e.goals||[]).indexOf(id)>=0; }); }
+  function activeGoals(){ return state.goals.filter(function(g){ return g.status!=="achieved"; }); }
+  function statusLabel(st){ return st==="got-it"?"Dominado":"Precisa treinar"; }
+
+  function applyBelt(){
+    var b=BELTS[state.profile.belt]||BELTS.white, root=document.documentElement.style;
+    root.setProperty("--belt",b.color); root.setProperty("--belt-ink",b.ink);
+    document.querySelectorAll(".btn-primary").forEach(function(el){ el.classList.toggle("dark-ink",!!b.dark); });
+    document.querySelectorAll("#f-type .pick, #f-feel .pick, #f-status .pick, #f-goals .pick").forEach(function(el){ el.classList.toggle("dark-on",!!b.dark); });
+    var g=document.getElementById("belt-graphic");
+    g.className="belt"+(state.profile.belt==="white"?" white":"")+(state.profile.belt==="black"?" black":"");
+    var bar=document.getElementById("belt-bar"); bar.innerHTML="";
+    for(var i=0;i<(state.profile.stripes||0);i++){ var t=document.createElement("span"); t.className="tick"; bar.appendChild(t); }
+    document.getElementById("belt-rank").textContent=b.label.toUpperCase();
+  }
+
+  var toastT;
+  function toast(msg){ var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("show"); },2400); }
+
+  var currentClipURL=null;
+  function clearClipURL(){ if(currentClipURL){ try{ URL.revokeObjectURL(currentClipURL); }catch(e){} currentClipURL=null; } }
+
+  function showView(name){
+    document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+    var el=document.getElementById("view-"+name); if(el) el.classList.add("active");
+    document.querySelectorAll(".nav button").forEach(function(b){ b.setAttribute("aria-current", b.dataset.nav===name?"true":"false"); });
+    window.scrollTo(0,0);
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  function cardHTML(e){
+    var foot=[];
+    if(e.video && ytId(e.video)) foot.push('<span class="has-video">&#9654; vídeo</span>');
+    if(e.clip) foot.push('<span class="has-clip">&#9654; clipe</span>');
+    (e.tags||[]).slice(0,3).forEach(function(t){ foot.push('<span class="chip tag">#'+esc(t)+'</span>'); });
+    (e.goals||[]).forEach(function(gid){ var g=goalById(gid); if(g) foot.push('<span class="chip goal">&#9678; '+esc(g.title)+'</span>'); });
+    if(e.status) foot.push('<span class="status '+e.status+'">'+statusLabel(e.status)+'</span>');
+    var tech=e.tech?esc(e.tech):'<span style="color:var(--dim-2)">Sem técnicas anotadas</span>';
+    return '<div class="card" data-open="'+e.id+'"><div class="card-top"><span class="card-date">'+fmtDate(e.date)+'</span>'+
+      (e.type?'<span class="card-type">'+esc(e.type)+'</span>':'')+'</div><p class="card-tech">'+tech+'</p>'+
+      (foot.length?'<div class="card-foot">'+foot.join("")+'</div>':'')+'</div>';
+  }
+
+  function renderHome(){
+    var s=streak(), n=state.entries.length, h=Math.round(matMinutes()/60), parts=[];
+    parts.push(n+" treino"+(n!==1?"s":"")); if(s>0) parts.push("sequência de "+s+" dia"+(s!==1?"s":"")); if(h>0) parts.push(h+"h de tatame");
+    document.getElementById("belt-stats").innerHTML=parts.join(" &middot; ");
+    applyBelt();
+    renderHomeGoals();
+    var feed=document.getElementById("home-feed"), list=sorted();
+    feed.innerHTML = list.length ? list.slice(0,40).map(cardHTML).join("")
+      : '<div class="empty"><div class="big">Nenhum treino ainda</div>Toque em &ldquo;Registrar treino de hoje&rdquo; depois da próxima aula para começar seu registro.</div>';
+  }
+
+  function renderHomeGoals(){
+    var wrap=document.getElementById("home-goals"), act=activeGoals();
+    if(!act.length){ wrap.innerHTML=""; return; }
+    var rows=act.slice(0,4).map(function(g){
+      var ss=goalSessions(g.id), last=ss[0]?ss[0].date:null, pv, warn=false;
+      if(!last){ pv="Ainda não treinada"; warn=true; }
+      else { var ago=agoText(last); pv="Treinada "+ss.length+"&times; &middot; última "+ago; if(isStale(ago)) warn=true; }
+      return '<div class="nc-item" data-goal="'+g.id+'"><span class="tgt"></span><div class="nc-main">'+
+        '<div class="t">'+esc(g.title)+'</div><div class="pv'+(warn?' warn':'')+'">'+pv+'</div></div></div>';
+    }).join("");
+    wrap.innerHTML='<div class="sec"><h2>Suas metas</h2><div class="rule"></div></div>'+rows;
+  }
+
+  function renderDetail(id){
+    clearClipURL();
+    var e=state.entries.filter(function(x){ return x.id===id; })[0];
+    if(!e){ showView("home"); return; }
+    var body=document.getElementById("detail-body"), vid=e.video&&ytId(e.video), html='';
+    html+='<div class="detail-head"><div class="detail-date">'+fmtLong(e.date)+'</div>'+(e.type?'<span class="card-type">'+esc(e.type)+'</span>':'')+'</div>';
+    if(e.clip){ html+='<div class="video local" id="clip-slot"><div class="video-missing">Carregando clipe&hellip;</div></div>'; }
+    if(vid){ var st=ytStart(e.video); html+='<div class="video"><iframe src="https://www.youtube.com/embed/'+vid+(st?('?start='+st):'')+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'; }
+    else if(e.video){ html+='<div class="video"><div class="video-missing">O link salvo não é uma URL do YouTube reconhecível.<br>Edite o treino para corrigir.</div></div>'; }
+
+    var mg=[];
+    if(e.rounds) mg.push(cell("Rounds",e.rounds));
+    if(e.duration) mg.push(cell("Tatame",e.duration+" min"));
+    if(e.feel) mg.push(cell("Sentiu",e.feel));
+    if(e.status) mg.push(cell("Status",statusLabel(e.status)));
+    if(mg.length) html+='<div class="meta-grid">'+mg.join("")+'</div>';
+
+    if((e.goals||[]).length){
+      var gs=e.goals.map(function(gid){ var g=goalById(gid); return g?'<span class="chip goal" data-goal="'+gid+'">&#9678; '+esc(g.title)+'</span>':''; }).join("");
+      if(gs) html+='<div class="block"><div class="k">Metas treinadas</div><div class="tag-row" style="margin:0">'+gs+'</div></div>';
+    }
+    if(e.tech) html+=block("Técnicas e posições",e.tech);
+    if(e.worked) html+=block("O que funcionou",e.worked,"worked");
+    if(e.didnt) html+=block("O que não funcionou",e.didnt,"didnt");
+    if(e.partners) html+=block("Parceiros",e.partners);
+    if(e.notes) html+=block("Notas",e.notes);
+    if((e.tags||[]).length) html+='<div class="tag-row">'+e.tags.map(function(t){ return '<span class="chip tag" data-tag="'+esc(t)+'">#'+esc(t)+'</span>'; }).join("")+'</div>';
+    html+='<div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost" data-action="edit" data-id="'+e.id+'">Editar</button></div>';
+    body.innerHTML=html;
+
+    if(e.clip){
+      clipDB.get(e.clip.id).then(function(blob){
+        var slot=document.getElementById("clip-slot"); if(!slot) return;
+        if(blob){ currentClipURL=URL.createObjectURL(blob);
+          slot.innerHTML='<video controls playsinline preload="metadata" src="'+currentClipURL+'"></video>';
+        } else { slot.innerHTML='<div class="video-missing">Este clipe está salvo no seu outro aparelho.<br>Clipes do celular não sincronizam pelo backup do iCloud.</div>'; }
+      }).catch(function(){
+        var slot=document.getElementById("clip-slot"); if(slot) slot.innerHTML='<div class="video-missing">Não foi possível carregar o clipe neste navegador.</div>';
+      });
+    }
+    showView("detail");
+  }
+  function cell(k,v){ return '<div class="mg"><div class="k">'+k+'</div><div class="v">'+esc(String(v))+'</div></div>'; }
+  function block(k,v,cls){ return '<div class="block '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+esc(v)+'</div></div>'; }
+
+  function renderPositions(){
+    var map=allTags(), keys=Object.keys(map).sort(function(a,b){ return map[b]-map[a]||a.localeCompare(b); }), wrap=document.getElementById("positions-list");
+    if(!keys.length){ wrap.innerHTML='<div class="empty"><div class="big">Nenhuma posição ainda</div>Adicione tags ao registrar um treino e elas aparecem aqui.</div>'; return; }
+    var max=map[keys[0]]||1;
+    wrap.innerHTML=keys.map(function(t){ var c=map[t], pct=Math.max(12,Math.round(c/max*100));
+      return '<div class="pos-item" data-tag="'+esc(t)+'"><div style="flex:1"><div class="name">#'+esc(t)+'</div><div class="bar" style="width:'+pct+'%"></div></div><div class="cnt">'+c+'</div></div>'; }).join("");
+  }
+  function renderPosition(tag){
+    document.getElementById("position-title").textContent="#"+tag;
+    document.getElementById("position-entries").innerHTML=sorted().filter(function(e){ return (e.tags||[]).indexOf(tag)>=0; }).map(cardHTML).join("");
+    showView("position");
+  }
+
+  function renderSearch(q){
+    var box=document.getElementById("search-results"); q=(q||"").trim().toLowerCase();
+    if(!q){ box.innerHTML='<div class="empty">Busque em todo o seu histórico — uma posição, o nome de um parceiro, qualquer coisa que você escreveu.</div>'; return; }
+    var hits=sorted().filter(function(e){
+      var gnames=(e.goals||[]).map(function(gid){ var g=goalById(gid); return g?g.title:""; }).join(" ");
+      return [e.tech,e.worked,e.didnt,e.partners,e.notes,e.feel,e.type,(e.tags||[]).join(" "),gnames].join(" ").toLowerCase().indexOf(q)>=0;
+    });
+    box.innerHTML = hits.length ? hits.map(cardHTML).join("") : '<div class="empty">Nada encontrado para &ldquo;'+esc(q)+'&rdquo;.</div>';
+  }
+
+  /* metas */
+  var editingGoalId=null;
+  function renderGoals(){
+    var wrap=document.getElementById("goals-list");
+    var act=state.goals.filter(function(g){ return g.status!=="achieved"; });
+    var done=state.goals.filter(function(g){ return g.status==="achieved"; });
+    var html="";
+    if(!state.goals.length){ html='<div class="empty"><div class="big">Nenhuma meta ainda</div>Adicione um objetivo de longo prazo acima — e marque nos seus treinos conforme for treinando.</div>'; }
+    else {
+      html+=act.map(goalCardHTML).join("");
+      if(done.length){ html+='<div class="goal-divider">Alcançadas</div>'+done.map(goalCardHTML).join(""); }
+    }
+    wrap.innerHTML=html;
+  }
+  function goalCardHTML(g){
+    var ss=goalSessions(g.id), last=ss[0]?ss[0].date:null, prog;
+    if(g.status==="achieved"){ prog='<span>Alcançada'+(g.achievedAt?(" &middot; "+agoText(g.achievedAt.slice(0,10))):"")+'</span>'; }
+    else if(!last){ prog='<span class="warntr">Ainda não treinada</span>'; }
+    else { prog='<span>Treinada '+ss.length+'&times;</span><span class="dotsep">&middot;</span><span>última '+agoText(last)+'</span>'; }
+    var chips=[];
+    if(g.target) chips.push('<span class="dotsep">&middot;</span><span>alvo '+fmtTarget(g.target)+'</span>');
+    if(g.video&&ytId(g.video)) chips.push('<span class="dotsep">&middot;</span><span class="has-video">&#9654; vídeo</span>');
+    return '<div class="goal-card'+(g.status==="achieved"?" done":"")+'" data-goal="'+g.id+'">'+
+      '<div class="goal-head">'+
+        '<div class="goal-check" data-goal-check="'+g.id+'" role="checkbox" aria-checked="'+(g.status==="achieved")+'"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>'+
+        '<div class="goal-main"><div class="goal-title">'+esc(g.title)+'</div>'+
+        (g.note?'<div class="goal-note">'+esc(g.note)+'</div>':'')+
+        '<div class="goal-prog">'+prog+chips.join("")+'</div></div>'+
+      '</div></div>';
+  }
+  function renderGoal(id){
+    clearClipURL();
+    var g=goalById(id); if(!g){ showView("goals"); return; }
+    var ss=goalSessions(id), last=ss[0]?ss[0].date:null, vid=g.video&&ytId(g.video), body=document.getElementById("goal-body"), html="";
+    html+='<div class="detail-head"><div class="detail-date">'+esc(g.title)+'</div></div>';
+    var sub=[];
+    sub.push(g.status==="achieved"?"Alcançada":"Ativa");
+    if(g.target) sub.push("alvo "+fmtTarget(g.target));
+    html+='<div style="color:var(--dim);font-size:13px;margin:-6px 0 16px">'+sub.join(" &middot; ")+'</div>';
+    if(vid){ var st=ytStart(g.video); html+='<div class="video"><iframe src="https://www.youtube.com/embed/'+vid+(st?('?start='+st):'')+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'; }
+    else if(g.video){ html+='<div class="video"><div class="video-missing">O link de referência não é uma URL do YouTube reconhecível.</div></div>'; }
+    if(g.note) html+=block("Nota",g.note);
+    var progLine = !ss.length ? "Ainda não treinada em nenhum treino." : ("Treinada em "+ss.length+" treino"+(ss.length!==1?"s":"")+(last?(" &middot; última "+agoText(last)):""));
+    html+='<div class="block"><div class="k">Progresso</div><div class="v" style="font-size:15px;color:var(--dim)">'+progLine+'</div></div>';
+    html+='<div class="btn-row" style="margin:4px 0 16px"><button class="btn btn-primary" data-action="goal-log" data-id="'+g.id+'">Registrar treino para esta meta</button></div>';
+    html+='<div class="btn-row" style="margin-bottom:16px">'+
+      '<button class="btn btn-ghost" data-action="goal-achieve" data-id="'+g.id+'">'+(g.status==="achieved"?"Reabrir meta":"Marcar como alcançada")+'</button>'+
+      '<button class="btn btn-ghost" data-action="goal-edit" data-id="'+g.id+'">Editar</button></div>';
+    if(ss.length){ html+='<div class="sec"><h2>Treinos nesta meta</h2><div class="rule"></div></div>'+ss.map(cardHTML).join(""); }
+    html+='<div style="margin-top:14px"><button class="btn btn-danger" data-action="goal-delete" data-id="'+g.id+'">Excluir meta</button></div>';
+    body.innerHTML=html;
+    showView("goal");
+  }
+  function goalFormReset(){
+    editingGoalId=null;
+    document.getElementById("g-title").value="";
+    document.getElementById("g-target").value="";
+    document.getElementById("g-video").value="";
+    document.getElementById("g-note").value="";
+    document.getElementById("g-submit").textContent="Adicionar meta";
+    document.getElementById("goal-form-title-lbl").textContent="Nova meta";
+    document.getElementById("g-cancel-wrap").style.display="none";
+  }
+  function addGoal(){
+    var title=document.getElementById("g-title").value.trim();
+    if(!title){ toast("Dê um nome à meta"); return; }
+    var fields={ title:title, target:document.getElementById("g-target").value||"", video:document.getElementById("g-video").value.trim(), note:document.getElementById("g-note").value.trim() };
+    if(editingGoalId){
+      var g=goalById(editingGoalId); if(g){ g.title=fields.title; g.target=fields.target; g.video=fields.video; g.note=fields.note; }
+      toast("Meta atualizada");
+    } else {
+      state.goals.push({ id:uid(), title:fields.title, target:fields.target, video:fields.video, note:fields.note, status:"active", created:Date.now() });
+      toast("Meta adicionada");
+    }
+    save(); goalFormReset(); renderGoals();
+  }
+  function editGoal(id){
+    var g=goalById(id); if(!g) return;
+    editingGoalId=id;
+    document.getElementById("g-title").value=g.title||"";
+    document.getElementById("g-target").value=g.target||"";
+    document.getElementById("g-video").value=g.video||"";
+    document.getElementById("g-note").value=g.note||"";
+    document.getElementById("g-submit").textContent="Salvar alterações";
+    document.getElementById("goal-form-title-lbl").textContent="Editar meta";
+    document.getElementById("g-cancel-wrap").style.display="block";
+    renderGoals(); showView("goals"); window.scrollTo(0,0);
+  }
+  function toggleAchieved(id){
+    var g=goalById(id); if(!g) return;
+    if(g.status==="achieved"){ g.status="active"; g.achievedAt=null; }
+    else { g.status="achieved"; g.achievedAt=new Date().toISOString(); }
+    save(); renderGoals(); renderHomeGoals();
+  }
+  function deleteGoal(id){
+    if(!confirm("Excluir esta meta? Seus treinos continuam, mas não ficarão mais vinculados a ela.")) return;
+    state.goals=state.goals.filter(function(g){ return g.id!==id; });
+    state.entries.forEach(function(e){ if(e.goals) e.goals=e.goals.filter(function(x){ return x!==id; }); });
+    save(); renderGoals(); renderHome(); toast("Meta excluída"); showView("goals");
+  }
+
+  /* formulario de treino */
+  var editingId=null, pendingGoalSelect=null;
+  var clip={mode:"none",ref:null,file:null};
+
+  function pickerValue(id){ var el=document.querySelector('#'+id+' .pick[aria-pressed="true"]'); return el?el.dataset.val:""; }
+  function setPicker(id,val){ document.querySelectorAll('#'+id+' .pick').forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.val===val?"true":"false"); }); }
+
+  function renderGoalPicker(selected){
+    var wrap=document.getElementById("f-goals"), act=activeGoals();
+    if(!act.length){ wrap.innerHTML='<div class="picker-empty">Nenhuma meta ativa ainda. Adicione na aba Metas e elas aparecem aqui.</div>'; return; }
+    wrap.innerHTML=act.map(function(g){ var on=selected&&selected.indexOf(g.id)>=0; return '<button type="button" class="pick" data-gid="'+g.id+'" aria-pressed="'+(on?"true":"false")+'">'+esc(g.title)+'</button>'; }).join("");
+  }
+  function selectedGoals(){ var out=[]; document.querySelectorAll('#f-goals .pick[aria-pressed="true"]').forEach(function(b){ out.push(b.dataset.gid); }); return out; }
+
+  function renderClipUI(){
+    var empty=document.getElementById("f-clip-empty"), pill=document.getElementById("f-clip-pill");
+    var show=null;
+    if(clip.mode==="new"&&clip.file) show={name:clip.file.name,size:clip.file.size};
+    else if(clip.mode==="keep"&&clip.ref) show={name:clip.ref.name,size:clip.ref.size};
+    if(show){ empty.style.display="none"; pill.style.display="flex";
+      document.getElementById("f-clip-name").textContent=show.name||"clipe";
+      document.getElementById("f-clip-size").textContent=fmtSize(show.size);
+    } else { empty.style.display="flex"; pill.style.display="none"; }
+  }
+
+  function openForm(id){
+    editingId=id||null;
+    document.getElementById("entry-title").textContent=id?"Editar treino":"Registrar treino";
+    document.getElementById("entry-delete-wrap").style.display=id?"block":"none";
+    var e=id?state.entries.filter(function(x){ return x.id===id; })[0]:null;
+    document.getElementById("f-date").value=e?e.date:todayISO();
+    document.getElementById("f-tech").value=e?e.tech||"":"";
+    document.getElementById("f-worked").value=e?e.worked||"":"";
+    document.getElementById("f-didnt").value=e?e.didnt||"":"";
+    document.getElementById("f-rounds").value=e?e.rounds||"":"";
+    document.getElementById("f-dur").value=e?e.duration||"":"";
+    document.getElementById("f-partners").value=e?e.partners||"":"";
+    document.getElementById("f-tags").value=e?(e.tags||[]).join(", "):"";
+    document.getElementById("f-video").value=e?e.video||"":"";
+    document.getElementById("f-notes").value=e?e.notes||"":"";
+    setPicker("f-type",e?e.type:""); setPicker("f-feel",e?e.feel:""); setPicker("f-status",e?e.status:"");
+    var sel = e?(e.goals||[]).slice():[];
+    if(pendingGoalSelect){ pendingGoalSelect.forEach(function(gid){ if(sel.indexOf(gid)<0) sel.push(gid); }); }
+    renderGoalPicker(sel);
+    pendingGoalSelect=null;
+    clip = (e&&e.clip) ? {mode:"keep",ref:e.clip,file:null} : {mode:"none",ref:null,file:null};
+    renderClipUI();
+    document.getElementById("f-clip-file").value="";
+    renderTagSuggest(); applyBelt(); showView("entry");
+  }
+  function renderTagSuggest(){
+    var map=allTags(), keys=Object.keys(map).sort(function(a,b){ return map[b]-map[a]; }).slice(0,12);
+    document.getElementById("f-tag-suggest").innerHTML=keys.map(function(t){ return '<button type="button" class="pick" data-addtag="'+esc(t)+'">'+esc(t)+'</button>'; }).join("");
+  }
+  function saveForm(){
+    var tags=document.getElementById("f-tags").value.split(",").map(function(s){ return s.trim().toLowerCase(); }).filter(Boolean);
+    tags=tags.filter(function(t,i){ return tags.indexOf(t)===i; });
+    var data={
+      date:document.getElementById("f-date").value||todayISO(),
+      type:pickerValue("f-type"),
+      tech:document.getElementById("f-tech").value.trim(),
+      worked:document.getElementById("f-worked").value.trim(),
+      didnt:document.getElementById("f-didnt").value.trim(),
+      rounds:document.getElementById("f-rounds").value.trim(),
+      duration:document.getElementById("f-dur").value.trim(),
+      partners:document.getElementById("f-partners").value.trim(),
+      feel:pickerValue("f-feel"),
+      goals:selectedGoals(),
+      tags:tags,
+      video:document.getElementById("f-video").value.trim(),
+      status:pickerValue("f-status"),
+      notes:document.getElementById("f-notes").value.trim()
+    };
+
+    var oldRefId = (clip.ref && clip.ref.id) ? clip.ref.id : null;
+    var ops=[];
+    if(clip.mode==="new" && clip.file){
+      var newId=uid();
+      data.clip={ id:newId, name:clip.file.name, size:clip.file.size, type:clip.file.type };
+      ops.push(clipDB.put(newId, clip.file).catch(function(){ delete data.clip; toast("Não foi possível salvar o clipe neste navegador"); }));
+      if(oldRefId) ops.push(clipDB.del(oldRefId).catch(function(){}));
+    } else if(clip.mode==="keep" && clip.ref){
+      data.clip=clip.ref;
+    } else if(clip.mode==="remove"){
+      if(oldRefId) ops.push(clipDB.del(oldRefId).catch(function(){}));
+    }
+
+    Promise.all(ops).then(function(){
+      if(editingId){
+        var e=state.entries.filter(function(x){ return x.id===editingId; })[0];
+        if(e){ for(var k in data) e[k]=data[k]; if(!data.clip) delete e.clip; }
+      } else {
+        data.id=uid(); data.created=Date.now(); if(!data.clip) delete data.clip;
+        state.entries.push(data);
+      }
+      save(); var wasEdit=!!editingId; editingId=null;
+      clip={mode:"none",ref:null,file:null};
+      renderHome(); toast(wasEdit?"Treino atualizado":"Treino salvo"); showView("home");
+    });
+  }
+  function deleteEntry(){
+    if(!editingId) return;
+    if(!confirm("Excluir este treino? Não dá para desfazer.")) return;
+    var e=state.entries.filter(function(x){ return x.id===editingId; })[0];
+    if(e&&e.clip) clipDB.del(e.clip.id).catch(function(){});
+    state.entries=state.entries.filter(function(x){ return x.id!==editingId; });
+    save(); editingId=null; clip={mode:"none",ref:null,file:null};
+    renderHome(); toast("Treino excluído"); showView("home");
+  }
+  function attachClip(){ document.getElementById("f-clip-file").click(); }
+  function onClipFile(file){
+    if(!file) return;
+    if(file.size > 75*1048576){
+      if(!confirm("Este clipe tem "+fmtSize(file.size)+". Vídeos grandes podem ser apagados pelo iOS e deixar o app lento — um clipe cortado ou um upload não listado no YouTube é mais seguro. Anexar mesmo assim?")) { document.getElementById("f-clip-file").value=""; return; }
+    }
+    clip.mode="new"; clip.file=file; renderClipUI();
+  }
+  function removeClip(){
+    if(clip.ref){ clip.mode="remove"; } else { clip.mode="none"; }
+    clip.file=null; document.getElementById("f-clip-file").value=""; renderClipUI();
+  }
+
+  /* ajustes */
+  function renderSettings(){
+    document.getElementById("belt-picker").innerHTML=BELT_ORDER.map(function(k){ var b=BELTS[k];
+      return '<div class="belt-swatch" data-belt="'+k+'" aria-pressed="'+(state.profile.belt===k)+'" title="'+b.label+'" style="background:'+b.color+(k==="white"?";border-color:rgba(0,0,0,.2)":"")+'"></div>'; }).join("");
+    document.getElementById("stripe-n").textContent=state.profile.stripes||0;
+    document.getElementById("last-backup").textContent=state.profile.lastBackup?new Date(state.profile.lastBackup).toLocaleString(LOC):"nunca";
+    document.getElementById("stat-sessions").textContent=state.entries.length;
+    document.getElementById("stat-mat").textContent=Math.round(matMinutes()/60)+"h";
+    document.getElementById("stat-streak").textContent=streak()+" dias";
+    document.getElementById("stat-goals").textContent=activeGoals().length;
+    document.getElementById("stat-pos").textContent=Object.keys(allTags()).length;
+    applyBelt();
+  }
+
+  /* backup / restauração */
+  function backup(){
+    var cleanEntries=state.entries.map(function(e){ var c={}; for(var k in e) if(k!=="clip") c[k]=e[k]; return c; });
+    var payload={ app:"rolls", version:2, exportedAt:new Date().toISOString(), profile:state.profile, goals:state.goals, entries:cleanEntries };
+    var json=JSON.stringify(payload,null,2), fname="rolls-backup-"+todayISO()+".json", blob=new Blob([json],{type:"application/json"}), file=null;
+    try{ file=new File([blob],fname,{type:"application/json"}); }catch(e){}
+    if(file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      navigator.share({files:[file],title:"backup do rolls"}).then(markBackup).catch(function(){});
+    } else {
+      var url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); },1000); markBackup(); toast("Backup baixado");
+    }
+  }
+  function markBackup(){ state.profile.lastBackup=new Date().toISOString(); save(); renderSettings(); }
+  function restore(file){
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var d=JSON.parse(r.result);
+        if(!d||!Array.isArray(d.entries)) throw new Error("bad");
+        if(!confirm("Substituir tudo neste aparelho por este backup? ("+d.entries.length+" treinos, "+((d.goals||[]).length)+" metas)")) return;
+        state.entries=d.entries; state.goals=d.goals||[]; state.profile=d.profile||state.profile;
+        save(); applyBelt(); renderHome(); renderSettings(); toast(d.entries.length+" treinos restaurados"); showView("home");
+      }catch(e){ alert("Esse arquivo não é um backup válido do rolls."); }
+    };
+    r.readAsText(file);
+  }
+
+  /* eventos */
+  document.addEventListener("click", function(ev){
+    var openCard=ev.target.closest("[data-open]"); if(openCard){ renderDetail(openCard.dataset.open); return; }
+
+    var goalCheck=ev.target.closest("[data-goal-check]"); if(goalCheck){ ev.stopPropagation(); toggleAchieved(goalCheck.dataset.goalCheck); return; }
+    var goalEl=ev.target.closest("[data-goal]"); if(goalEl){ renderGoal(goalEl.dataset.goal); return; }
+
+    var tagEl=ev.target.closest("[data-tag]"); if(tagEl){ renderPosition(tagEl.dataset.tag); return; }
+
+    var addTag=ev.target.closest("[data-addtag]");
+    if(addTag){ var inp=document.getElementById("f-tags"); var cur=inp.value.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+      if(cur.indexOf(addTag.dataset.addtag)<0){ cur.push(addTag.dataset.addtag); inp.value=cur.join(", "); } return; }
+
+    var pick=ev.target.closest(".pick");
+    if(pick && pick.parentElement && pick.parentElement.classList.contains("picker")){
+      if(pick.parentElement.classList.contains("multi")){ pick.setAttribute("aria-pressed", pick.getAttribute("aria-pressed")==="true"?"false":"true"); return; }
+      var was=pick.getAttribute("aria-pressed")==="true";
+      pick.parentElement.querySelectorAll(".pick").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
+      pick.setAttribute("aria-pressed", was?"false":"true"); return;
+    }
+
+    var sw=ev.target.closest("[data-belt]"); if(sw){ state.profile.belt=sw.dataset.belt; save(); applyBelt(); renderSettings(); return; }
+
+    var nav=ev.target.closest("[data-nav]");
+    if(nav){ var n=nav.dataset.nav;
+      if(n==="home") renderHome();
+      if(n==="goals"){ goalFormReset(); renderGoals(); }
+      if(n==="positions") renderPositions();
+      if(n==="search"){ document.getElementById("search-input").value=""; renderSearch(""); }
+      if(n==="settings") renderSettings();
+      showView(n);
+      if(n==="search") setTimeout(function(){ document.getElementById("search-input").focus(); },120);
+      return;
+    }
+
+    var a=ev.target.closest("[data-action]"); if(!a) return;
+    switch(a.dataset.action){
+      case "new": openForm(null); break;
+      case "edit": openForm(a.dataset.id); break;
+      case "save": saveForm(); break;
+      case "delete": deleteEntry(); break;
+      case "attach-clip": attachClip(); break;
+      case "remove-clip": removeClip(); break;
+      case "add-goal": addGoal(); break;
+      case "cancel-goal-edit": goalFormReset(); renderGoals(); break;
+      case "goal-log": pendingGoalSelect=[a.dataset.id]; openForm(null); break;
+      case "goal-achieve": toggleAchieved(a.dataset.id); renderGoal(a.dataset.id); break;
+      case "goal-edit": editGoal(a.dataset.id); break;
+      case "goal-delete": deleteGoal(a.dataset.id); break;
+      case "back-home": renderHome(); showView("home"); break;
+      case "back-goals": renderGoals(); showView("goals"); break;
+      case "back-positions": renderPositions(); showView("positions"); break;
+      case "go-settings": renderSettings(); showView("settings"); break;
+      case "stripe-up": state.profile.stripes=Math.min(6,(state.profile.stripes||0)+1); save(); renderSettings(); break;
+      case "stripe-down": state.profile.stripes=Math.max(0,(state.profile.stripes||0)-1); save(); renderSettings(); break;
+      case "backup": backup(); break;
+      case "restore-pick": document.getElementById("restore-file").click(); break;
+      case "wipe":
+        if(confirm("Apagar todos os treinos e metas deste aparelho? Confira se você fez backup.")){
+          state.entries=[]; state.goals=[]; save(); clipDB.clear().catch(function(){});
+          renderHome(); renderSettings(); toast("Tudo apagado");
+        }
+        break;
+    }
+  });
+
+  document.getElementById("search-input").addEventListener("input", function(e){ renderSearch(e.target.value); });
+  document.getElementById("restore-file").addEventListener("change", function(e){ if(e.target.files[0]) restore(e.target.files[0]); e.target.value=""; });
+  document.getElementById("f-clip-file").addEventListener("change", function(e){ if(e.target.files[0]) onClipFile(e.target.files[0]); });
+
+  if(navigator.storage && navigator.storage.persist){ try{ navigator.storage.persist(); }catch(e){} }
+
+  applyBelt(); renderHome();
+})();
+</script>
+</body>
+</html>
