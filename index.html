@@ -401,6 +401,20 @@
       <div class="set-line" style="margin-top:8px"><span>Último backup</span><span class="val" id="last-backup">nunca</span></div>
     </div>
     <div class="set-group">
+      <h3>Exportar PDF</h3>
+      <div class="picker" id="pdf-presets" style="margin-bottom:14px">
+        <button type="button" class="pick" data-pdf-range="all">Tudo</button>
+        <button type="button" class="pick" data-pdf-range="30">Últimos 30 dias</button>
+        <button type="button" class="pick" data-pdf-range="year">Este ano</button>
+      </div>
+      <div class="two">
+        <div class="field" style="margin-bottom:12px"><label>De</label><input type="date" id="pdf-from"></div>
+        <div class="field" style="margin-bottom:12px"><label>Até</label><input type="date" id="pdf-to"></div>
+      </div>
+      <button class="btn btn-primary" data-action="export-pdf">Gerar PDF e salvar</button>
+      <div class="backup-note">Gera um PDF com todas as observações e os links dos vídeos (clicáveis) do período escolhido. Depois escolha <b>Salvar em Arquivos &rarr; iCloud Drive</b>. Clipes do celular não entram no PDF.</div>
+    </div>
+    <div class="set-group">
       <h3>Seu histórico</h3>
       <div class="set-line"><span>Treinos registrados</span><span class="val" id="stat-sessions">0</span></div>
       <div class="set-line"><span>Tempo total de tatame</span><span class="val" id="stat-mat">0h</span></div>
@@ -892,6 +906,7 @@
     document.getElementById("stat-streak").textContent=streak()+" dias";
     document.getElementById("stat-goals").textContent=activeGoals().length;
     document.getElementById("stat-pos").textContent=Object.keys(allTags()).length;
+    if(!document.getElementById("pdf-to").value){ setPdfRange("all"); }
     applyBelt();
   }
 
@@ -923,6 +938,119 @@
     r.readAsText(file);
   }
 
+  /* exportar PDF */
+  var _jspdfP=null;
+  function loadJsPDF(){
+    if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if(_jspdfP) return _jspdfP;
+    _jspdfP=new Promise(function(res,rej){
+      var s=document.createElement("script");
+      s.src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js";
+      s.onload=function(){ (window.jspdf&&window.jspdf.jsPDF)?res(window.jspdf.jsPDF):rej(new Error("no jspdf")); };
+      s.onerror=function(){ _jspdfP=null; rej(new Error("load fail")); };
+      document.head.appendChild(s);
+    });
+    return _jspdfP;
+  }
+  function setPdfRange(kind){
+    var to=todayISO(), from="";
+    if(kind==="all"){ var ds=state.entries.map(function(e){ return e.date; }).sort(); from=ds.length?ds[0]:to; }
+    else if(kind==="30"){ var d=new Date(); d.setDate(d.getDate()-29); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); from=d.toISOString().slice(0,10); }
+    else if(kind==="year"){ from=to.slice(0,4)+"-01-01"; }
+    document.getElementById("pdf-from").value=from;
+    document.getElementById("pdf-to").value=to;
+  }
+  function exportPDF(){
+    if(!state.entries.length){ toast("Nenhum treino para exportar"); return; }
+    var from=document.getElementById("pdf-from").value, to=document.getElementById("pdf-to").value;
+    var list=sorted().slice().reverse().filter(function(e){
+      if(from && e.date<from) return false;
+      if(to && e.date>to) return false;
+      return true;
+    });
+    if(!list.length){ toast("Nenhum treino nesse período"); return; }
+    toast("Gerando PDF…");
+    loadJsPDF().then(function(jsPDF){ buildPDF(jsPDF, list, from, to); })
+      .catch(function(){ alert("Não foi possível carregar o gerador de PDF. Confira sua conexão com a internet e tente novamente."); });
+  }
+  function buildPDF(jsPDF, list, from, to){
+    var doc=new jsPDF({unit:"pt",format:"a4"});
+    var W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
+    var M=48, x=M, y=M, maxW=W-M*2;
+    var INK=[20,32,33], DIM=[110,125,120], BELT=[37,102,168], GOOD=[60,140,90], WARN=[170,100,40];
+    function setC(c){ doc.setTextColor(c[0],c[1],c[2]); }
+    function ensure(h){ if(y+h > H-M){ doc.addPage(); y=M; } }
+    function heading(txt){
+      ensure(30);
+      doc.setFont("helvetica","bold"); doc.setFontSize(13); setC(BELT);
+      var ls=doc.splitTextToSize(txt, maxW);
+      for(var i=0;i<ls.length;i++){ doc.text(ls[i], x, y); y+=16; }
+      y+=2; doc.setDrawColor(225); doc.setLineWidth(0.5); doc.line(x,y,x+maxW,y); y+=14;
+    }
+    function field(label, value, labelColor){
+      if(!value) return;
+      ensure(14);
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); setC(labelColor||DIM);
+      doc.text(label.toUpperCase(), x, y); y+=12;
+      doc.setFont("helvetica","normal"); doc.setFontSize(10.5); setC(INK);
+      var lines=doc.splitTextToSize(String(value), maxW);
+      for(var i=0;i<lines.length;i++){ ensure(14); doc.text(lines[i], x, y); y+=14; }
+      y+=5;
+    }
+    function linkField(label, url){
+      ensure(14);
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); setC(DIM);
+      doc.text(label.toUpperCase(), x, y); y+=12;
+      doc.setFont("helvetica","normal"); doc.setFontSize(10.5); setC(BELT);
+      var lines=doc.splitTextToSize(url, maxW);
+      for(var i=0;i<lines.length;i++){ ensure(14); doc.textWithLink(lines[i], x, y, {url:url}); y+=14; }
+      y+=5; setC(INK);
+    }
+
+    // capa
+    doc.setFont("helvetica","bold"); doc.setFontSize(24); setC(INK);
+    doc.text("rolls", x, y+16); y+=30;
+    doc.setFont("helvetica","normal"); doc.setFontSize(11); setC(DIM);
+    var period=(from?fmtTarget(from):"início")+"  até  "+(to?fmtTarget(to):"hoje");
+    doc.text("Diário de jiu-jitsu  ·  "+period, x, y); y+=15;
+    doc.text("Gerado em "+new Date().toLocaleDateString("pt-BR")+"  ·  "+list.length+" treino"+(list.length!==1?"s":""), x, y); y+=12;
+    doc.setDrawColor(210); doc.setLineWidth(1); doc.line(x,y,x+maxW,y); y+=20;
+
+    list.forEach(function(e){
+      ensure(48);
+      heading(fmtLong(e.date)+(e.type?("    ·    "+e.type):""));
+      if(e.status) field("Status", statusLabel(e.status));
+      var gtxt=(e.goals||[]).map(function(gid){ var g=goalById(gid); return g?g.title:null; }).filter(Boolean).join(", ");
+      if(gtxt) field("Metas treinadas", gtxt);
+      field("Técnicas e posições", e.tech);
+      field("O que funcionou", e.worked, GOOD);
+      field("O que não funcionou", e.didnt, WARN);
+      field("Parceiros", e.partners);
+      var mt=[]; if(e.rounds) mt.push(e.rounds+" rounds"); if(e.duration) mt.push(e.duration+" min de tatame"); if(e.feel) mt.push(e.feel);
+      if(mt.length) field("Treino", mt.join("    ·    "));
+      if((e.tags||[]).length) field("Tags", e.tags.map(function(t){ return "#"+t; }).join("   "));
+      if(e.video && ytId(e.video)) linkField("Vídeo (YouTube)", e.video);
+      else if(e.video) field("Vídeo (link)", e.video);
+      if(e.clip) field("Clipe", "Há um clipe salvo no aparelho — vídeos não entram no PDF.");
+      field("Notas", e.notes);
+      y+=10;
+    });
+
+    var pages=doc.internal.getNumberOfPages();
+    for(var p=1;p<=pages;p++){ doc.setPage(p); doc.setFont("helvetica","normal"); doc.setFontSize(8); setC([165,165,165]);
+      doc.text("rolls  ·  "+p+"/"+pages, W-M, H-22, {align:"right"}); }
+
+    var fname="rolls-diario-"+(from||"inicio")+"_a_"+(to||todayISO())+".pdf";
+    var blob=doc.output("blob"), file=null;
+    try{ file=new File([blob],fname,{type:"application/pdf"}); }catch(e){}
+    if(file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      navigator.share({files:[file],title:"Diário rolls"}).then(function(){ toast("PDF pronto"); }).catch(function(){});
+    } else {
+      try{ doc.save(fname); }catch(e){ var url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },1000); }
+      toast("PDF gerado");
+    }
+  }
+
   /* eventos */
   document.addEventListener("click", function(ev){
     var openCard=ev.target.closest("[data-open]"); if(openCard){ renderDetail(openCard.dataset.open); return; }
@@ -935,6 +1063,11 @@
     var addTag=ev.target.closest("[data-addtag]");
     if(addTag){ var inp=document.getElementById("f-tags"); var cur=inp.value.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
       if(cur.indexOf(addTag.dataset.addtag)<0){ cur.push(addTag.dataset.addtag); inp.value=cur.join(", "); } return; }
+
+    var pdfRange=ev.target.closest("[data-pdf-range]");
+    if(pdfRange){ setPdfRange(pdfRange.dataset.pdfRange);
+      pdfRange.parentElement.querySelectorAll(".pick").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
+      pdfRange.setAttribute("aria-pressed","true"); return; }
 
     var pick=ev.target.closest(".pick");
     if(pick && pick.parentElement && pick.parentElement.classList.contains("picker")){
@@ -979,6 +1112,7 @@
       case "stripe-up": state.profile.stripes=Math.min(6,(state.profile.stripes||0)+1); save(); renderSettings(); break;
       case "stripe-down": state.profile.stripes=Math.max(0,(state.profile.stripes||0)-1); save(); renderSettings(); break;
       case "backup": backup(); break;
+      case "export-pdf": exportPDF(); break;
       case "restore-pick": document.getElementById("restore-file").click(); break;
       case "wipe":
         if(confirm("Apagar todos os treinos e metas deste aparelho? Confira se você fez backup.")){
